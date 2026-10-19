@@ -106,15 +106,53 @@ export default function Home({ setQuiz }) {
             </div>
 
             <div className="form-group">
-              <label>Number of Questions: <strong>{form.count}</strong></label>
+              <div className="count-label-row">
+                <label>Number of Questions:</label>
+                <div className="count-input-wrapper">
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={form.count}
+                    onChange={(e) => {
+                      const val = Math.max(1, Math.min(100, Number(e.target.value) || 1));
+                      setForm({ ...form, count: val });
+                    }}
+                    className="count-number-input"
+                  />
+                  <span className="count-unit">questions</span>
+                </div>
+              </div>
+
+              {/* Quick Preset Selector Buttons */}
+              <div className="count-presets-pills">
+                {[5, 10, 25, 50, 100].map((presetCount) => (
+                  <button
+                    key={presetCount}
+                    type="button"
+                    className={`count-preset-btn ${form.count === presetCount ? "active" : ""}`}
+                    onClick={() => setForm({ ...form, count: presetCount })}
+                  >
+                    {presetCount === 100 ? "💯 100 Qs (Exam)" : `${presetCount} Qs`}
+                  </button>
+                ))}
+              </div>
+
               <input
                 type="range"
-                min="3"
-                max="20"
+                min="1"
+                max="100"
                 value={form.count}
                 onChange={(e) => setForm({ ...form, count: Number(e.target.value) })}
                 className="range-slider"
               />
+
+              {form.count >= 25 && (
+                <div className="mega-quiz-badge">
+                  <span>⚡ {form.count >= 50 ? "Full Mock Exam Mode" : "Comprehensive Study Test"}:</span>
+                  <span>~{Math.ceil(form.count * 0.8)} mins completion time</span>
+                </div>
+              )}
             </div>
 
             <div className="form-group">

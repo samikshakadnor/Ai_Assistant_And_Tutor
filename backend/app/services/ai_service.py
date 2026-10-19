@@ -48,13 +48,17 @@ def call_gemini_api(system_prompt, user_prompt):
                 headers={"Content-Type": "application/json"},
                 method="POST"
             )
-            with urllib.request.urlopen(req, timeout=25) as res:
+            with urllib.request.urlopen(req, timeout=10) as res:
                 res_data = json.loads(res.read().decode("utf-8"))
                 raw_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
                 clean_text = raw_text.replace("```json", "").replace("```", "").strip()
                 return json.loads(clean_text)
         except Exception as e:
+            err_str = str(e).lower()
             print(f"[Gemini API Error - Model {model}]: {e}")
+            # If the API key or model is rejected or unavailable, do not loop slowly
+            if "api key" in err_str or "400" in err_str or "403" in err_str or "404" in err_str or "503" in err_str or "unauthorized" in err_str:
+                break
             try:
                 payload["generationConfig"].pop("responseMimeType", None)
                 req = urllib.request.Request(
@@ -63,13 +67,15 @@ def call_gemini_api(system_prompt, user_prompt):
                     headers={"Content-Type": "application/json"},
                     method="POST"
                 )
-                with urllib.request.urlopen(req, timeout=25) as res:
+                with urllib.request.urlopen(req, timeout=10) as res:
                     res_data = json.loads(res.read().decode("utf-8"))
                     raw_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
                     clean_text = raw_text.replace("```json", "").replace("```", "").strip()
                     return json.loads(clean_text)
             except Exception as inner_e:
                 print(f"[Gemini API Fallback Error - Model {model}]: {inner_e}")
+                if "api key" in str(inner_e).lower() or "400" in str(inner_e) or "403" in str(inner_e):
+                    break
 
     return None
 

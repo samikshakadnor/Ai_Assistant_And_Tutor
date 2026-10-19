@@ -14,6 +14,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [user, setUser] = useState(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState("google");
   const location = useLocation();
 
   const isChatRoute = location.pathname === "/" || location.pathname === "/chat";
@@ -29,6 +30,11 @@ export default function App() {
     }
   }, []);
 
+  const handleOpenAuth = (mode = "google") => {
+    setAuthMode(typeof mode === "string" ? mode : "google");
+    setAuthModalOpen(true);
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userData");
@@ -41,7 +47,7 @@ export default function App() {
       {!isChatRoute && (
         <Navbar
           user={user}
-          onOpenAuth={() => setAuthModalOpen(true)}
+          onOpenAuth={handleOpenAuth}
           onLogout={handleLogout}
         />
       )}
@@ -55,7 +61,7 @@ export default function App() {
                 setQuiz={setQuiz}
                 user={user}
                 setUser={setUser}
-                onOpenAuth={() => setAuthModalOpen(true)}
+                onOpenAuth={handleOpenAuth}
                 onLogout={handleLogout}
               />
             }
@@ -67,7 +73,7 @@ export default function App() {
                 setQuiz={setQuiz}
                 user={user}
                 setUser={setUser}
-                onOpenAuth={() => setAuthModalOpen(true)}
+                onOpenAuth={handleOpenAuth}
                 onLogout={handleLogout}
               />
             }
@@ -75,7 +81,7 @@ export default function App() {
           <Route path="/quiz" element={<Quiz quiz={quiz} setResult={setResult} user={user} />} />
           <Route path="/result" element={<Result result={result} quiz={quiz} setQuiz={setQuiz} />} />
           <Route path="/history" element={<History setQuiz={setQuiz} user={user} />} />
-          <Route path="/studio" element={<Home setQuiz={setQuiz} user={user} onOpenAuth={() => setAuthModalOpen(true)} />} />
+          <Route path="/studio" element={<Home setQuiz={setQuiz} user={user} onOpenAuth={handleOpenAuth} />} />
         </Routes>
       </main>
 
@@ -87,6 +93,7 @@ export default function App() {
 
       <AuthModal
         isOpen={authModalOpen}
+        initialMode={authMode}
         onClose={() => setAuthModalOpen(false)}
         onAuthSuccess={(userData) => setUser(userData)}
       />
